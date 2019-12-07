@@ -1,9 +1,14 @@
 # Celestial-Tech-Pack-discord-bot
 
 to run this bot follow these steps.
-step 1- open prefex.txt and add ur bot prefex
-step 2- open token.txt and add your bot token
+
+step 1- open prefex.txt and add ur bot prefex.
+
+step 2- open token.txt and add your bot token.
+
 step 3- run bot.py
+
+dont forget to install all requiments first.......
 
 if you want to invite this bot in your server follow 
 https://top.gg/bot/630636544587464704
