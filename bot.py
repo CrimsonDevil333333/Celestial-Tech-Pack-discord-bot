@@ -82,7 +82,6 @@ async def remind(ctx,data = None):
 async def top(ctx):
 
     guilds = await bot.fetch_guilds(limit=150).flatten()
-    
     clr=(0x00b3ff,0xff1f1f,0xff1ff8,0x141cff,0x14ffb1,0x67ff14,0xffe014,0xff1814)
     clrs=random.choice(clr)
     embed = discord.Embed(title="Server Ranking",
