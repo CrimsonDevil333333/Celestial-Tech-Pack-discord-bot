@@ -80,7 +80,7 @@ async def remind(ctx,data = None):
 """
 @bot.command(pass_context=True, aliases=["rank","ranks"])
 async def top(ctx):
-
+    print(ctx.guild)
     guilds = await bot.fetch_guilds(limit=150).flatten()
     clr=(0x00b3ff,0xff1f1f,0xff1ff8,0x141cff,0x14ffb1,0x67ff14,0xffe014,0xff1814)
     clrs=random.choice(clr)
@@ -208,8 +208,22 @@ async def dank_memes(ctx):
 @bot.command(pass_context=True)
 async def CTP(ctx):
     if str(ctx.channel) in ctp:
+        guild_name = ctx.guild
+        try:
+            f = open(f"db\{guild_name}.txt","r")
+            n = f.read()
+            print(n)
+        except:
+            print("File created")
+            n = 0
+
+        n = int(n) + 1
+        f = open(f"db\{guild_name}.txt","w")
+        f.write(f'{n}')
+        f.close()
+
         embed = discord.Embed(title="You opened ctp chest",
-                              description='Congratulations you got....',
+                              description=f"Congratulations you got....",
                               color=0x541212)
         img=("https://images-ext-2.discordapp.net/external/YfVV20vl6Mj_Q4XLOmJm1nCrAWF8eFoqj4leIsURCYE/https/i.imgur.com/etw0hUL.png","https://images-ext-1.discordapp.net/external/YklWbDTPoe6AeXiArE7a0p4Lh93r0Fy5f6ghRlSdyZA/https/i.imgur.com/eVtYF8p.png","https://images-ext-2.discordapp.net/external/_5DOwPLfHgA2DvDWveGwe7i8sUkmcvsIEyf4hBBNnjc/https/i.imgur.com/75XVqes.png","https://images-ext-1.discordapp.net/external/_68_kCWy02q6RnGwVsMfMegZP8Qag2egsjqbxf5sBH4/https/i.imgur.com/J7dVhbw.png","https://images-ext-1.discordapp.net/external/VAwn2iQV-Gf9jCB2CqCbDA5G50kvJ1UWjR0GJq0L17s/https/i.imgur.com/IBIsuaE.png","https://images-ext-2.discordapp.net/external/Kn9aMzYw6CqpNshTkL__QLX_fJAFS-42ufMM-y1gWgA/https/i.imgur.com/TRsLAIl.png","https://images-ext-2.discordapp.net/external/Qj2h-IAyrHx7fbFyeVM397nyyu-VlmVrhgs6TrmOj4g/https/i.imgur.com/7K0Xz07.png","https://images-ext-2.discordapp.net/external/l13EMZL0jlp4vqI-dIdK0PlDV1_Z7XFXXQEg_lLGuQg/https/i.imgur.com/jYiGknu.png","https://images-ext-2.discordapp.net/external/uIcnLNGQHL_PUM99p83tca-ijFLjBdk3X1pg_mlNx6M/https/i.imgur.com/ylLLge9.png","https://images-ext-1.discordapp.net/external/xFgl3XSvluPfW-DezQ4Lwx--Pu5FIEnoIw04Ew54DI8/https/i.imgur.com/T6ryvUs.png","https://images-ext-1.discordapp.net/external/C8-VixGH4g8lfBwq9KUvFeJki44o-F2-qgW8tVZbF2E/https/i.imgur.com/Wp5xlsy.png")
         
