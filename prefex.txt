@@ -1,1 +1,1 @@
-"remove this and add your bot prefix here"
+.

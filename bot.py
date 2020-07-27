@@ -5,9 +5,21 @@ from discord.ext import commands
 import random
 from random import randrange
 import asyncio
+import praw
+import datetime
+
+import pytz
+import threading
+from itertools import cycle
+
 ctp = ["ctp-guide"]
 uru_guide = ["uru-guide"]
-
+memes_ctrl = ["memes"]
+reddit = praw.Reddit(client_id='FNpct8XLVG2LTg',
+                     client_secret='UeA14hUpw7LoKlkqFU2QDLoWu8M',
+                     username='CrimsonDevil333',
+                     password='shashikant@1',
+                     user_agent='my user agent')
 def read_token():
     with open("token.txt","r") as f:
         lines =f.readlines()
@@ -21,11 +33,67 @@ prefex = read_prefex()
 bot = commands.Bot(command_prefix=prefex , case_insensitive=True)
 bot.remove_command("help")
 
+
+
 @bot.event
 async def on_ready():
     print("Logged in as: " + bot.user.name + "\n")
-    return await bot.change_presence(activity=discord.Activity(type=2 , name="Crimanu MFF \nUse prefix as '.'"))
+    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=f'{len(bot.guilds)+79} servers | .help'))
+    
 
+
+""" Discontinued! 
+async def check_reset_time(ctx):
+        await bot.wait_until_ready()
+        daily_reset_time = "19:30:00"
+        time = daily_reset_time.split(":")
+        ist = pytz.timezone('Asia/Kolkata')
+        aware1 = datetime.datetime(2020,4,1,int(time[0]),int(time[1]),int(time[2]),0,pytz.timezone('Asia/Kolkata'))
+        tocompare1 = datetime.time(aware1.hour, aware1.minute, aware1.second)
+
+        daily_reset_time = "19:30:01"
+        time = daily_reset_time.split(":")
+        aware2 = datetime.datetime(2020,4,1,int(time[0]),int(time[1]),int(time[2]),0,pytz.timezone('Asia/Kolkata'))
+        tocompare2 = datetime.time(aware2.hour, aware2.minute, aware2.second)
+
+        while not bot.is_closed():
+            start = datetime.datetime.now(tz=ist)
+            start = datetime.time(start.hour, start.minute,start.second)
+            if start == tocompare1 or start == tocompare2:
+                await ctx.send(f"{ctx.message.author.mention} only 1hr is left for daily reset in MFF ofcz.")
+                break
+            await ctx.send(".ctp")
+            await asyncio.sleep(10)
+            
+@bot.command(name='remind')
+async def remind(ctx,data = None):
+    bot.loop.create_task(check_reset_time(ctx))
+    await ctx.send(f"Remainder is activated on the request of {ctx.message.author}")
+
+"""
+"""    n = ""
+    a = 1
+    async for guild in bot.fetch_guilds(limit=35):
+        n = n + str(a) + ". " + str(guild.name) + "\n"
+        a=int(a)+1
+    await ctx.send(n)
+"""
+@bot.command(pass_context=True, aliases=["rank","ranks"])
+async def top(ctx):
+
+    guilds = await bot.fetch_guilds(limit=150).flatten()
+    
+    clr=(0x00b3ff,0xff1f1f,0xff1ff8,0x141cff,0x14ffb1,0x67ff14,0xffe014,0xff1814)
+    clrs=random.choice(clr)
+    embed = discord.Embed(title="Server Ranking",
+                          description=f'This ranking is based on no of times bot is used per day!\n\n1. {guilds[0]}\n2. {guilds[1]}\n3. {guilds[2]}\n.4 {guilds[3]}\n5. {guilds[4]}\n',
+                          color=clrs)
+    embed.set_thumbnail(
+        url="https://i.ibb.co/4WHBRtm/pngfind-com-anime-png-598288.png"
+    )
+    embed.set_footer(text=f"{ctx.guild}", icon_url=f"{ctx.guild.icon_url}")
+    embed.timestamp = datetime.datetime.utcnow()
+    await ctx.send(embed=embed)
 
 #Help command
 @bot.command(pass_context=True, aliases=['h'])
@@ -44,7 +112,8 @@ async def Help(ctx):
                                                    "Destruction - '.destruction' , '.d'\nRefinement - '.refinement' , '.ref'\nTranscendence - '.transcendence' , '.trans'\n"
                                                    "Patience - '.patience' , '.p'\nVeteran - '.veteran' , '.v'\nLocation of ctp - '.location' , '.l'", inline=False)
         embed.add_field(name='CTP Chest',value="You can try your luck by rolling one of those ctp chest keep in mind No ctp of veteren is there in it \nUse '.ctp'",inline=False)
-
+        embed.set_footer(text=f"{ctx.guild}", icon_url=f"{ctx.guild.icon_url}")
+        embed.timestamp = datetime.datetime.utcnow()
 
 
         await ctx.send(embed=embed)
@@ -52,6 +121,89 @@ async def Help(ctx):
         await ctx.send(f"```Hello this is odin's blessing help book.....\nPefix = '{prefex}'\nodin - to open odin box\nuru/ob blessing_name - to know about particular blessing\n(example - to know about heal '.uru heal')\nname - to know names of odin blessings if you dont know```")
 
 
+@bot.command(pass_context=True, aliases=['memes'])
+async def meme(ctx):
+    if str(ctx.channel) in memes_ctrl:
+        memes_submissions = memes_submissions = reddit.subreddit('Memes').hot()
+        post_to_pick = random.randint(1, 100)
+        for i in range(0, post_to_pick):
+            submission = next(x for x in memes_submissions if not x.stickied)
+
+        embed = discord.Embed(title="Meme Smashhhh....",
+                              description=f'Todays meme coming right up on request of \n{ctx.message.author}',
+                              color=0x00FFDA) 
+        embed.set_thumbnail(
+            url="https://i.ibb.co/cX0qSkJ/http-pluspng-com-img-png-meme-png-lol-png-transparent-image-931.png"
+        )
+        embed.set_image(
+            url=submission.url
+        )
+        embed.set_footer(text=f"{ctx.guild}", icon_url=f"{ctx.guild.icon_url}")
+        embed.timestamp = datetime.datetime.utcnow()
+        await ctx.send(embed=embed)
+
+#
+@bot.command(pass_context=True, aliases=['marvelmemes','mavelmeme','mar'])
+async def marvel(ctx):
+    if str(ctx.channel) in memes_ctrl:
+        memes_submissions = memes_submissions = reddit.subreddit('marvelmemes').hot()
+        post_to_pick = random.randint(1, 100)
+        for i in range(0, post_to_pick):
+            submission = next(x for x in memes_submissions if not x.stickied)
+
+        embed = discord.Embed(title="Marvel Meme Smashhhh....",
+                              description=f'Todays marvel meme coming right up on request of \n{ctx.message.author}',
+                              color=0x47FF00) 
+        embed.set_thumbnail(
+            url="https://i.ibb.co/zRJydjc/pngguru-com.png"
+        )
+        embed.set_image(
+            url=submission.url
+        )
+        embed.set_footer(text=f"{ctx.guild}", icon_url=f"{ctx.guild.icon_url}")
+        embed.timestamp = datetime.datetime.utcnow()
+        await ctx.send(embed=embed)
+
+@bot.command(pass_context=True, aliases=['animes'])
+async def anime(ctx):
+    if str(ctx.channel) in memes_ctrl:
+        memes_submissions = memes_submissions = reddit.subreddit('Animemes').hot()
+        post_to_pick = random.randint(1, 100)
+        for i in range(0, post_to_pick):
+            submission = next(x for x in memes_submissions if not x.stickied)
+
+        embed = discord.Embed(title="Kawaii Animes Memes",
+                              description=f'Kawaii Memes coming right up on request of \n{ctx.message.author}',
+                              color=0xF91CD4) 
+        embed.set_thumbnail(
+            url="https://i.ibb.co/SyqCmJd/pngguru-com-1.png"
+        )
+        embed.set_image(
+            url=submission.url
+        )
+        embed.set_footer(text=f"{ctx.guild}", icon_url=f"{ctx.guild.icon_url}")
+        embed.timestamp = datetime.datetime.utcnow()
+        await ctx.send(embed=embed)
+@bot.command(pass_context = True,aliases=["dank"])
+async def dank_memes(ctx):
+    if str(ctx.channel) in memes_ctrl:
+        memes_submissions = memes_submissions = reddit.subreddit('dankmemes').hot()
+        post_to_pick = random.randint(1, 100)
+        for i in range(0, post_to_pick):
+            submission = next(x for x in memes_submissions if not x.stickied)
+
+        embed = discord.Embed(title="Dank Memes",
+                              description=f'Ya danker here is your dank meme .... \n',
+                              color=0xF91CD4) 
+        embed.set_thumbnail(
+            url="https://i.ibb.co/rtGzWNN/Png-Item-29573.png"
+        )
+        embed.set_image(
+            url=submission.url
+        )
+        embed.set_footer(text=f"{ctx.guild}", icon_url=f"{ctx.guild.icon_url}")
+        embed.timestamp = datetime.datetime.utcnow()
+        await ctx.send(embed=embed)
 
 #ctp command
 @bot.command(pass_context=True)
@@ -66,6 +218,8 @@ async def CTP(ctx):
         embed.set_image(
             url=imgs
         )
+        embed.set_footer(text=f"{ctx.guild}", icon_url=f"{ctx.guild.icon_url}")
+        embed.timestamp = datetime.datetime.utcnow()
 
         await ctx.send(embed=embed)
 
@@ -80,6 +234,8 @@ async def Greed(ctx):
         embed.set_thumbnail(url="https://images-ext-2.discordapp.net/external/l13EMZL0jlp4vqI-dIdK0PlDV1_Z7XFXXQEg_lLGuQg/https/i.imgur.com/jYiGknu.png")
         embed.add_field(name="Location", value='Custom Gear Chest, Selector: CTP (Advanced/New)', inline = False)
         embed.add_field(name='Stats at Maximum Roll', value ='• Applies to: Self\nGuard Break Immunity \n• Ignore Dodge +45%\n• Applies to: Self % chance when attacking \nApplies to: Self \n10% recovery of Max HP.\n150% increase to damage against COMBAT, BLAST-type characters. (5 sec.)\n150% increase to damage against SPEED, UNIVERSAL-type characters. (5 sec.)\n(Activates Damage increase effect in turn.)\nCooldown Time 12 seconds', inline=False)
+        embed.set_footer(text=f"{ctx.guild}", icon_url=f"{ctx.guild.icon_url}")
+        embed.timestamp = datetime.datetime.utcnow()
         await ctx.send(embed=embed)
 
 @bot.command(pass_context=True, aliases=['j','judge','judgemen'])
@@ -91,6 +247,8 @@ async def Judgement(ctx):
         embed.set_thumbnail(url="https://images-ext-2.discordapp.net/external/uIcnLNGQHL_PUM99p83tca-ijFLjBdk3X1pg_mlNx6M/https/i.imgur.com/ylLLge9.png")
         embed.add_field(name="Location", value='Custom Gear Chest, Selector: CTP (Advanced/New)', inline = False)
         embed.add_field(name='Stats at Maximum Roll', value ='• Applies to: Self\n• All Attacks +32% \n• Chain Hit Damage Dealt +20%\n• Activation Rate: 10% chance when attacking\nApplies to: Enemies \nDecreases All Resistance by 30%. (5 sec.)\nApplies to: Self\nIncreased damage to all element damage by +200%. (5 sec.)\nCooldown Time 7 seconds', inline=False)
+        embed.set_footer(text=f"{ctx.guild}", icon_url=f"{ctx.guild.icon_url}")
+        embed.timestamp = datetime.datetime.utcnow()
         await ctx.send(embed=embed)
 
 @bot.command(pass_context=True, aliases=['i','in','sight'])
@@ -102,6 +260,8 @@ async def insight(ctx):
         embed.set_thumbnail(url="https://images-ext-1.discordapp.net/external/xFgl3XSvluPfW-DezQ4Lwx--Pu5FIEnoIw04Ew54DI8/https/i.imgur.com/T6ryvUs.png")
         embed.add_field(name="Location", value='Custom Gear Chest, Selector: CTP (Advanced/New)', inline = False)
         embed.add_field(name='Stats at Maximum Roll', value ='• Max HP +34%\n• All Defense +39%\n• Activation Rate: 10% chance when attacking\n• Applies to: All Allies \nIncreases damage dealt to SUPER HERO-type characters by 20%. (5 sec.)\nIncreases damage dealt to SUPER VILLAIN-type characters by 20%. (5 sec.)\n(The effect that applies to all team members cannot be applied in duplicate.)\nCooldown Time 7 seconds', inline=False)
+        embed.set_footer(text=f"{ctx.guild}", icon_url=f"{ctx.guild.icon_url}")
+        embed.timestamp = datetime.datetime.utcnow()
         await ctx.send(embed=embed)
 
 #ctp of energy
@@ -114,6 +274,8 @@ async def Energy(ctx):
         embed.set_thumbnail(url="https://images-ext-1.discordapp.net/external/C8-VixGH4g8lfBwq9KUvFeJki44o-F2-qgW8tVZbF2E/https/i.imgur.com/Wp5xlsy.png")
         embed.add_field(name="Location", value='Cinematic Battle Reward(Mythic Hela, Killmonger), Story Mission 13 - 8 First Clear Reward, Custom Gear Chest', inline = False)
         embed.add_field(name='Stats at Maximum Roll', value ='• Ignore Dodge + 45 % \n• Critical Damage ↑ +45 % \n• Activation Rate: 10 % chance when attacking \nApplies to: Self Increases Chain Hit damage by 30 % when attacking.(5 sec.) Increases damage by 200 % for 1 attack(s).(5 sec.) Cooldown Time 7 seconds', inline=False)
+        embed.set_footer(text=f"{ctx.guild}", icon_url=f"{ctx.guild.icon_url}")
+        embed.timestamp = datetime.datetime.utcnow()
         await ctx.send(embed=embed)
 
 #ctp of rage
@@ -129,6 +291,8 @@ async def Rage(ctx):
         embed.set_thumbnail(url="https://images-ext-2.discordapp.net/external/Qj2h-IAyrHx7fbFyeVM397nyyu-VlmVrhgs6TrmOj4g/https/i.imgur.com/7K0Xz07.png")
         embed.add_field(name="Location", value='custom Gear Chest, Legendary battle - Thanos type 6', inline = False)
         embed.add_field(name="Stats at Maximum Roll", value ="• Critical Rate ↑ +32%\n• Dodge ↑ +32%\n• Activation Rate: 20% chance when dealing critical attack \nApplies to: Self Ignores Boss's Damage Decrease by 60% (5 sec.) Increases 0.9% damage per 1% of Dodge Rate and Critical Rate, regardless of Guaranteed Dodge Rate and Guaranteed Critical Rate (5 sec.) Cooldown Time 7 seconds'", inline=False)
+        embed.set_footer(text=f"{ctx.guild}", icon_url=f"{ctx.guild.icon_url}")
+        embed.timestamp = datetime.datetime.utcnow()
         await ctx.send(embed=embed)
 
 #ctp of regenration
@@ -145,6 +309,8 @@ async def Regenration(ctx):
         embed.add_field(name="Stats at Maximum Roll",
                         value="• Max HP ↑ +34% \n• Guard Break Immunity, Increase HP Regen by 90% \n• Activation Rate: when HP is below 50% \nGenerates a Shield that is 35% of Max HP and ignores Cancel and Pierce effects (5 sec.) Recover 10% of Max HP Cooldown Time 10 seconds",
                         inline=False)
+        embed.set_footer(text=f"{ctx.guild}", icon_url=f"{ctx.guild.icon_url}")
+        embed.timestamp = datetime.datetime.utcnow()
         await ctx.send(embed=embed)
 
 #ctp of authority
@@ -162,6 +328,8 @@ async def authority(ctx):
         embed.add_field(name="Stats at Maximum Roll",
                         value="• Applies to: Self Guard Break Immunity \n• Critical Damage ↑ +45% \n• Activation Rate: when HP is below 50%: \nApplies to: Self Accumulates 100% of True Damage regardless of Defense and Dodge stats. The total true damage accumulated cannot exceed 10% of HP. (7 sec.) Increases Attack by +5% for each 1% of damage taken. (7 sec.) Invincible (5 sec.) Cooldown Time 10 seconds",
                         inline=False)
+        embed.set_footer(text=f"{ctx.guild}", icon_url=f"{ctx.guild.icon_url}")
+        embed.timestamp = datetime.datetime.utcnow()
         await ctx.send(embed=embed)
 
 #ctp of destruction
@@ -179,6 +347,8 @@ async def destruction(ctx):
         embed.add_field(name="Stats at Maximum Roll",
                         value="• Critical Damage ↑ +45% \n• Applies to: Self \nGuard Break Immunity \n• Activation Rate: 10% chance when attacking \nApplies to: Self 30% chance to penetrate with SUPER ARMOR, BARRIER, ALL DAMAGE IMMUNE, INVINCIBLE effect. (5 sec.) Increases damage by 200% for 1 attack(s). (5 sec.) Cooldown Time 7 seconds ",
                         inline=False)
+        embed.set_footer(text=f"{ctx.guild}", icon_url=f"{ctx.guild.icon_url}")
+        embed.timestamp = datetime.datetime.utcnow()
         await ctx.send(embed=embed)
 
 
@@ -197,6 +367,8 @@ async def refinement(ctx):
         embed.add_field(name="Stats at Maximum Roll",
                         value="• Max HP ↑ +34% \n• Recovery Rate ↑ +90% \n• Activation Rate: when HP is below 50% \nApplies to: Self\nGuard against 6 hits (6 sec.) 20% Recovery of MAX HP.Cooldown Time 15 seconds",
                         inline=False)
+        embed.set_footer(text=f"{ctx.guild}", icon_url=f"{ctx.guild.icon_url}")
+        embed.timestamp = datetime.datetime.utcnow()
         await ctx.send(embed=embed)
 
 
@@ -213,6 +385,8 @@ async def veteran(ctx):
         embed.add_field(name="Stats at Maximum Roll",
                         value="• Guard Break Immunity, Ignore Dodge, Critical Damage Increase +32% \n• Increases All Attacks and Defense +28% \n• Activation Rate: 15% chance when attacking\nApplies to: Self\nIncreases Chain Hit Damage by 40% when attacking. (5 sec.)Creates a Shield that is 30% of Max HP and ignores Cancel and Pierce effects. (3 sec.)Increases damage by 150% for 1 attack(s). (5 sec.)Cooldown Time 7 seconds",
                         inline=False)
+        embed.set_footer(text=f"{ctx.guild}", icon_url=f"{ctx.guild.icon_url}")
+        embed.timestamp = datetime.datetime.utcnow()
         await ctx.send(embed=embed)
 
 
@@ -231,6 +405,8 @@ async def transcendence(ctx):
         embed.add_field(name="Stats at Maximum Roll",
                         value="• All Attack ↑ +40%\n• Ignore Dodge +45%\n• Activation Rate: when HP is below 50%\nApplies to: Self\nDecreases the effect of Reflect by 50% Reflects effect(s): PHYSICAL REFLECT, ENERGY REFLECT (5 sec.) Invincible (5 sec.) Cooldown Time 10 seconds",
                         inline=False)
+        embed.set_footer(text=f"{ctx.guild}", icon_url=f"{ctx.guild.icon_url}")
+        embed.timestamp = datetime.datetime.utcnow()
         await ctx.send(embed=embed)
 
 
@@ -248,6 +424,8 @@ async def Patience(ctx):
         embed.add_field(name="Stats at Maximum Roll",
                         value="• All Attack ↑ +40%\n• Dodge ↑ +40%\n• Activation Rate: when HP is below 50%\nApplies to: Self\nDecreases the effect of Reflect by 50% Reflects effect(s): PHYSICAL REFLECT, ENERGY REFLECT (5 sec.) Invincible (5 sec.) Cooldown Time 10 seconds",
                         inline=False)
+        embed.set_footer(text=f"{ctx.guild}", icon_url=f"{ctx.guild.icon_url}")
+        embed.timestamp = datetime.datetime.utcnow()
         await ctx.send(embed=embed)
 
 
@@ -375,7 +553,8 @@ async def odinbless(ctx):
         embed.set_image(
             url=imgs
         )
-
+        embed.set_footer(text=f"{ctx.guild}", icon_url=f"{ctx.guild.icon_url}")
+        embed.timestamp = datetime.datetime.utcnow()
         await ctx.send(embed=embed)
 
 bot.run(token)
