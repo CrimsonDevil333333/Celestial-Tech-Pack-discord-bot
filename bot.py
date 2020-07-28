@@ -84,7 +84,7 @@ async def on_ready():
     print("Logged in as: " + bot.user.name + "\n")
     bot.loop.create_task(Auto_data_upload())
     global Rank_data
-    with open('db\db.json') as json_file:
+    with open('db.json') as json_file:
         Rank_data = json.load(json_file)
     print("Data loaded sucessfully")
     await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=f'{len(bot.guilds)+79} servers | .help'))
@@ -96,7 +96,7 @@ async def Auto_data_upload():
 
         while not bot.is_closed():
             global Rank_data
-            with open('db\db.json', 'w') as outfile:
+            with open('db.json', 'w') as outfile:
                 json.dump(Rank_data, outfile,indent=4)          
             print("saved")
             await asyncio.sleep(600)
@@ -104,10 +104,10 @@ async def Auto_data_upload():
 @bot.command(pass_context=True, aliases=["backup","records"])
 async def record(ctx):
     global Rank_data
-    with open('db\db.json', 'w') as outfile:
+    with open('db.json', 'w') as outfile:
         json.dump(Rank_data, outfile,indent=4)
     if str(ctx.author) in valid_users:
-        file = discord.File("db\db.json", filename="db.json")
+        file = discord.File("db.json", filename="db.json")
         await ctx.channel.send("Current database ❤",file=file)
     else :
         await ctx.send("This feature is only for Devlopers !")
@@ -115,7 +115,7 @@ async def record(ctx):
 @bot.command(pass_context=True, aliases=["Update"])
 async def up(ctx):
     global Rank_data
-    with open('db\db.json', 'w') as outfile:
+    with open('db.json', 'w') as outfile:
         json.dump(Rank_data, outfile,indent=4)
 
 @bot.command(pass_context=True, aliases=["point"])
