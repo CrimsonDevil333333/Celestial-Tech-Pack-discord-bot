@@ -7,7 +7,7 @@ from random import randrange
 import asyncio
 import praw
 import datetime
-
+import json
 import pytz
 import threading
 from itertools import cycle
@@ -20,6 +20,14 @@ reddit = praw.Reddit(client_id='FNpct8XLVG2LTg',
                      username='CrimsonDevil333',
                      password='shashikant@1',
                      user_agent='my user agent')
+valid_users = ["Crimson Devil#7759"]
+global Rank_data
+Rank_data = [{
+    "guild_name" : "Weeb Smasher's",
+    "guild_id" : 629650238583341066,
+    "point" : 0
+}]
+
 def read_token():
     with open("token.txt","r") as f:
         lines =f.readlines()
@@ -33,59 +41,105 @@ prefex = read_prefex()
 bot = commands.Bot(command_prefix=prefex , case_insensitive=True)
 bot.remove_command("help")
 
+def scoringSystem(ids=None,name=None):
+    if ids != None and name != None:
+        id_guild = ids
+        print(id_guild)
+        name_guild = name
+        global Rank_data
+        try:
+            for r in range(0,1000,1):
+                if Rank_data[r]['guild_id'] == id_guild:
+                    points = Rank_data[r]['point']
+                    Rank_data[r]['point'] = points + 1
+                    print(f'{name_guild} has {points} points')
+                    return "yes"
+                    break
+        except:
+            points = 1
+            Rank_data = Rank_data + [{
+                "guild_name" : f'{name_guild}',
+                "guild_id" : id_guild,
+                "point" : points
+            }]
+            return "no"
+    
+def particularPoints(ids=None):
+    if ids!= None:
+        id_guild = ids
+        global Rank_data
+        try:
+            for r in range(0,1000,1):
+                if Rank_data[r]['guild_id'] == id_guild:
+                    points = Rank_data[r]['point']
+                    return points
+        except:
+            points = 0
+            return points
+
 
 
 @bot.event
 async def on_ready():
     print("Logged in as: " + bot.user.name + "\n")
+    bot.loop.create_task(Auto_data_upload())
+    global Rank_data
+    with open('db\db.json') as json_file:
+        Rank_data = json.load(json_file)
+    print("Data loaded sucessfully")
     await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=f'{len(bot.guilds)+79} servers | .help'))
     
 
 
-""" Discontinued! 
-async def check_reset_time(ctx):
+async def Auto_data_upload():
         await bot.wait_until_ready()
-        daily_reset_time = "19:30:00"
-        time = daily_reset_time.split(":")
-        ist = pytz.timezone('Asia/Kolkata')
-        aware1 = datetime.datetime(2020,4,1,int(time[0]),int(time[1]),int(time[2]),0,pytz.timezone('Asia/Kolkata'))
-        tocompare1 = datetime.time(aware1.hour, aware1.minute, aware1.second)
-
-        daily_reset_time = "19:30:01"
-        time = daily_reset_time.split(":")
-        aware2 = datetime.datetime(2020,4,1,int(time[0]),int(time[1]),int(time[2]),0,pytz.timezone('Asia/Kolkata'))
-        tocompare2 = datetime.time(aware2.hour, aware2.minute, aware2.second)
 
         while not bot.is_closed():
-            start = datetime.datetime.now(tz=ist)
-            start = datetime.time(start.hour, start.minute,start.second)
-            if start == tocompare1 or start == tocompare2:
-                await ctx.send(f"{ctx.message.author.mention} only 1hr is left for daily reset in MFF ofcz.")
-                break
-            await ctx.send(".ctp")
-            await asyncio.sleep(10)
+            global Rank_data
+            with open('db\db.json', 'w') as outfile:
+                json.dump(Rank_data, outfile,indent=4)          
+            print("saved")
+            await asyncio.sleep(600)
             
-@bot.command(name='remind')
-async def remind(ctx,data = None):
-    bot.loop.create_task(check_reset_time(ctx))
-    await ctx.send(f"Remainder is activated on the request of {ctx.message.author}")
+@bot.command(pass_context=True, aliases=["backup","records"])
+async def record(ctx):
+    global Rank_data
+    with open('db\db.json', 'w') as outfile:
+        json.dump(Rank_data, outfile,indent=4)
+    if str(ctx.author) in valid_users:
+        file = discord.File("db\db.json", filename="db.json")
+        await ctx.channel.send("Current database ❤",file=file)
+    else :
+        await ctx.send("This feature is only for Devlopers !")
 
-"""
-"""    n = ""
-    a = 1
-    async for guild in bot.fetch_guilds(limit=35):
-        n = n + str(a) + ". " + str(guild.name) + "\n"
-        a=int(a)+1
-    await ctx.send(n)
-"""
+@bot.command(pass_context=True, aliases=["Update"])
+async def up(ctx):
+    global Rank_data
+    with open('db\db.json', 'w') as outfile:
+        json.dump(Rank_data, outfile,indent=4)
+
+@bot.command(pass_context=True, aliases=["point"])
+async def points(ctx):
+    global Rank_data   
+    await ctx.send(f"Your server points are {particularPoints(ctx.guild.id)}")
+
 @bot.command(pass_context=True, aliases=["rank","ranks"])
 async def top(ctx):
-    print(ctx.guild)
-    guilds = await bot.fetch_guilds(limit=150).flatten()
+    
+    
+    global Rank_data
+    
+    new_rank = sorted(Rank_data, key = lambda i: i['point'])
+
+    
+
+    """guilds = await bot.fetch_guilds(limit=150).flatten()
+    print(guilds)"""
+
     clr=(0x00b3ff,0xff1f1f,0xff1ff8,0x141cff,0x14ffb1,0x67ff14,0xffe014,0xff1814)
     clrs=random.choice(clr)
     embed = discord.Embed(title="Server Ranking",
-                          description=f'This ranking is based on no of times bot is used per day!\n\n1. {guilds[0]}\n2. {guilds[1]}\n3. {guilds[2]}\n.4 {guilds[3]}\n5. {guilds[4]}\n',
+                          description=f'This ranking is based on no of times bot is used!\n\n1️⃣ {new_rank[-1]["guild_name"]} :- ({new_rank[-1]["point"]})\n\n2️⃣ {new_rank[-2]["guild_name"]} :- ({new_rank[-2]["point"]})\n\n3️⃣ {new_rank[-3]["guild_name"]} :- ({new_rank[-3]["point"]})\n\n4️⃣ {new_rank[-4]["guild_name"]} :- ({new_rank[-4]["point"]})\n\n5️⃣ {new_rank[-5]["guild_name"]} :- ({new_rank[-5]["point"]})\n\nYour server points :- {particularPoints(ctx.guild.id)}',
                           color=clrs)
     embed.set_thumbnail(
         url="https://i.ibb.co/4WHBRtm/pngfind-com-anime-png-598288.png"
@@ -98,6 +152,10 @@ async def top(ctx):
 @bot.command(pass_context=True, aliases=['h'])
 async def Help(ctx):
     if str(ctx.channel) in ctp:
+        l = scoringSystem(ctx.guild.id,ctx.guild)
+        if l == "no":
+            await ctx.send("**This is one time msg only !!!**\nNew Feature Leaderbord has been added now Servers can compete with others ! \nScores will be based on how many times Bot is used \nTo check the your points use (.points) \nTo check top 5 servers use (.rank)")
+
         clr=(0x00b3ff,0xff1f1f,0xff1ff8,0x141cff,0x14ffb1,0x67ff14,0xffe014,0xff1814)
         clrs=random.choice(clr)
         embed = discord.Embed(title="This is CTP guide bot",
@@ -123,6 +181,10 @@ async def Help(ctx):
 @bot.command(pass_context=True, aliases=['memes'])
 async def meme(ctx):
     if str(ctx.channel) in memes_ctrl:
+        l = scoringSystem(ctx.guild.id,ctx.guild)
+        if l == "no":
+            await ctx.send("**This is one time msg only !!!**\nNew Feature Leaderbord has been added now Servers can compete with others ! \nScores will be based on how many times Bot is used \nTo check the your points use (.points) \nTo check top 5 servers use (.rank)")
+
         memes_submissions = memes_submissions = reddit.subreddit('Memes').hot()
         post_to_pick = random.randint(1, 100)
         for i in range(0, post_to_pick):
@@ -145,6 +207,10 @@ async def meme(ctx):
 @bot.command(pass_context=True, aliases=['marvelmemes','mavelmeme','mar'])
 async def marvel(ctx):
     if str(ctx.channel) in memes_ctrl:
+        l = scoringSystem(ctx.guild.id,ctx.guild)
+        if l == "no":
+            await ctx.send("**This is one time msg only !!!**\nNew Feature Leaderbord has been added now Servers can compete with others ! \nScores will be based on how many times Bot is used \nTo check the your points use (.points) \nTo check top 5 servers use (.rank)")
+
         memes_submissions = memes_submissions = reddit.subreddit('marvelmemes').hot()
         post_to_pick = random.randint(1, 100)
         for i in range(0, post_to_pick):
@@ -166,6 +232,10 @@ async def marvel(ctx):
 @bot.command(pass_context=True, aliases=['animes'])
 async def anime(ctx):
     if str(ctx.channel) in memes_ctrl:
+        l = scoringSystem(ctx.guild.id,ctx.guild)
+        if l == "no":
+            await ctx.send("**This is one time msg only !!!**\nNew Feature Leaderbord has been added now Servers can compete with others ! \nScores will be based on how many times Bot is used \nTo check the your points use (.points) \nTo check top 5 servers use (.rank)")
+
         memes_submissions = memes_submissions = reddit.subreddit('Animemes').hot()
         post_to_pick = random.randint(1, 100)
         for i in range(0, post_to_pick):
@@ -186,6 +256,10 @@ async def anime(ctx):
 @bot.command(pass_context = True,aliases=["dank"])
 async def dank_memes(ctx):
     if str(ctx.channel) in memes_ctrl:
+        l = scoringSystem(ctx.guild.id,ctx.guild)
+        if l == "no":
+            await ctx.send("**This is one time msg only !!!**\nNew Feature Leaderbord has been added now Servers can compete with others ! \nScores will be based on how many times Bot is used \nTo check the your points use (.points) \nTo check top 5 servers use (.rank)")
+
         memes_submissions = memes_submissions = reddit.subreddit('dankmemes').hot()
         post_to_pick = random.randint(1, 100)
         for i in range(0, post_to_pick):
@@ -208,19 +282,13 @@ async def dank_memes(ctx):
 @bot.command(pass_context=True)
 async def CTP(ctx):
     if str(ctx.channel) in ctp:
-        guild_name = ctx.guild
-        try:
-            f = open(f"db\{guild_name}.txt","r")
-            n = f.read()
-            print(n)
-        except:
-            print("File created")
-            n = 0
 
-        n = int(n) + 1
-        f = open(f"db\{guild_name}.txt","w")
-        f.write(f'{n}')
-        f.close()
+        
+        l = scoringSystem(ctx.guild.id,ctx.guild)
+        if l == "no":
+            await ctx.send("**This is one time msg only !!!**\nNew Feature Leaderbord has been added now Servers can compete with others ! \nScores will be based on how many times Bot is used \nTo check the your points use (.points) \nTo check top 5 servers use (.rank)")
+
+        
 
         embed = discord.Embed(title="You opened ctp chest",
                               description=f"Congratulations you got....",
@@ -241,6 +309,10 @@ async def CTP(ctx):
 @bot.command(pass_context=True, aliases=['g'])
 async def Greed(ctx):
     if str(ctx.channel) in ctp:
+        l = scoringSystem(ctx.guild.id,ctx.guild)
+        if l == "no":
+            await ctx.send("**This is one time msg only !!!**\nNew Feature Leaderbord has been added now Servers can compete with others ! \nScores will be based on how many times Bot is used \nTo check the your points use (.points) \nTo check top 5 servers use (.rank)")
+
         embed = discord.Embed(title="CTP of Greed",
                               description="This is a good pve ctp. This ctp is good for characters like (thanos,jean..) as this ctp works good in both pvp and sometimes as well as pve content.",
                               color=0x55B80B)
@@ -254,6 +326,10 @@ async def Greed(ctx):
 @bot.command(pass_context=True, aliases=['j','judge','judgemen'])
 async def Judgement(ctx):
     if str(ctx.channel) in ctp:
+        l = scoringSystem(ctx.guild.id,ctx.guild)
+        if l == "no":
+            await ctx.send("**This is one time msg only !!!**\nNew Feature Leaderbord has been added now Servers can compete with others ! \nScores will be based on how many times Bot is used \nTo check the your points use (.points) \nTo check top 5 servers use (.rank)")
+
         embed = discord.Embed(title="CTP of Judgement",
                               description="An extremely powerful CTP for Pve characters with all attack and chain hit for characters  whose damage is based on elemental attacks (i.e. cyclops,luna snow etc) Lacks the ignore boss defence like rage so might be bad for characters like namor for in abx/wbu boosts the damage for 5sec on any skill with element better than energy atk but not better than rage for elemental characters",
                               color=0x010846)
@@ -267,6 +343,10 @@ async def Judgement(ctx):
 @bot.command(pass_context=True, aliases=['i','in','sight'])
 async def insight(ctx):
     if str(ctx.channel) in ctp:
+        l = scoringSystem(ctx.guild.id,ctx.guild)
+        if l == "no":
+            await ctx.send("**This is one time msg only !!!**\nNew Feature Leaderbord has been added now Servers can compete with others ! \nScores will be based on how many times Bot is used \nTo check the your points use (.points) \nTo check top 5 servers use (.rank)")
+
         embed = discord.Embed(title="CTP of Insight",
                               description="Could be useful in pve game modes where you can add damage by having this obelisk on a support character or even a character with a good leadership Against world boss or Shadowland,  ABX\nThere maybe some usefulness maybe in PVP as well Except the fact that it doesn't have itgb",
                               color=0x5D0B6D)
@@ -281,6 +361,10 @@ async def insight(ctx):
 @bot.command(pass_context=True, aliases=['e'])
 async def Energy(ctx):
     if str(ctx.channel) in ctp:
+        l = scoringSystem(ctx.guild.id,ctx.guild)
+        if l == "no":
+            await ctx.send("**This is one time msg only !!!**\nNew Feature Leaderbord has been added now Servers can compete with others ! \nScores will be based on how many times Bot is used \nTo check the your points use (.points) \nTo check top 5 servers use (.rank)")
+
         embed = discord.Embed(title="CTP of Energy",
                               description="Good for any kind of character especially those who can cancel their skill without make the animation stopped. The Ignore Dodge stat is very good to help character fight against bosses with high Dodge rate such as Frost Beast in ABX Speed Villain/Hero or Corvus Glaive WBU",
                               color=0xff0000)
@@ -295,6 +379,10 @@ async def Energy(ctx):
 @bot.command(pass_context=True, aliases=['r'])
 async def Rage(ctx):
     if str(ctx.channel) in ctp:
+        l = scoringSystem(ctx.guild.id,ctx.guild)
+        if l == "no":
+            await ctx.send("**This is one time msg only !!!**\nNew Feature Leaderbord has been added now Servers can compete with others ! \nScores will be based on how many times Bot is used \nTo check the your points use (.points) \nTo check top 5 servers use (.rank)")
+
         embed = discord.Embed(title="CTP of Rage",
                               description="This CTP has special damage proc buff that allow your character to receive Increases"
                                            " Damage buff for any skill when proc is activated. Therefore this CTP will be very great "
@@ -312,6 +400,10 @@ async def Rage(ctx):
 @bot.command(pass_context=True, aliases=['reg', 'regen'])
 async def Regenration(ctx):
     if str(ctx.channel) in ctp:
+        l = scoringSystem(ctx.guild.id,ctx.guild)
+        if l == "no":
+            await ctx.send("**This is one time msg only !!!**\nNew Feature Leaderbord has been added now Servers can compete with others ! \nScores will be based on how many times Bot is used \nTo check the your points use (.points) \nTo check top 5 servers use (.rank)")
+
         embed = discord.Embed(title="CTP of Regenration",
                               description="Made for PvP character due to its defensive stat. It is best to give this CTP to character "
                                            "who has healing ability either as passive or active skill.",
@@ -330,6 +422,10 @@ async def Regenration(ctx):
 @bot.command(pass_context=True, aliases=['a', 'auth'])
 async def authority(ctx):
     if str(ctx.channel) in ctp:
+        l = scoringSystem(ctx.guild.id,ctx.guild)
+        if l == "no":
+            await ctx.send("**This is one time msg only !!!**\nNew Feature Leaderbord has been added now Servers can compete with others ! \nScores will be based on how many times Bot is used \nTo check the your points use (.points) \nTo check top 5 servers use (.rank)")
+
         embed = discord.Embed(title="CTP of Authority",
                               description="A defensive version of CTP of Destruction, but without buff to pierce through defensive skill. "
                                            "Which makes this CTP only works for character who already has an ability to pierce. The offensive stat"
@@ -349,6 +445,10 @@ async def authority(ctx):
 @bot.command(pass_context=True, aliases=['des', 'd'])
 async def destruction(ctx):
     if str(ctx.channel) in ctp:
+        l = scoringSystem(ctx.guild.id,ctx.guild)
+        if l == "no":
+            await ctx.send("**This is one time msg only !!!**\nNew Feature Leaderbord has been added now Servers can compete with others ! \nScores will be based on how many times Bot is used \nTo check the your points use (.points) \nTo check top 5 servers use (.rank)")
+
         embed = discord.Embed(title="CTP of Destruction",
                               description="A hybrid CTP, providing stat for both PvP and PvE mode. Extremely good for character with high "
                                            "survivability but lacking ability to pierce through defensive buff. The Increase Damage buff will "
@@ -370,6 +470,10 @@ async def destruction(ctx):
 @bot.command(pass_context=True, aliases=['ref', 'refine'])
 async def refinement(ctx):
     if str(ctx.channel) in ctp:
+        l = scoringSystem(ctx.guild.id,ctx.guild)
+        if l == "no":
+            await ctx.send("**This is one time msg only !!!**\nNew Feature Leaderbord has been added now Servers can compete with others ! \nScores will be based on how many times Bot is used \nTo check the your points use (.points) \nTo check top 5 servers use (.rank)")
+
         embed = discord.Embed(title="CTP of Refinement",
                               description="With the Max HP stat and Recovery ability provided, this CTP is good for character who has high defense against"
                                        " certain attack but lack of ability to heal. But due to the absence of Immunity to Guard Break, this CTP is not suitable for PvP metas",
@@ -389,6 +493,10 @@ async def refinement(ctx):
 @bot.command(pass_context=True, aliases=['vet', 'v'])
 async def veteran(ctx):
     if str(ctx.channel) in ctp:
+        l = scoringSystem(ctx.guild.id,ctx.guild)
+        if l == "no":
+            await ctx.send("**This is one time msg only !!!**\nNew Feature Leaderbord has been added now Servers can compete with others ! \nScores will be based on how many times Bot is used \nTo check the your points use (.points) \nTo check top 5 servers use (.rank)")
+
         embed = discord.Embed(title="CTP of Veteran",
                               description="Hard to find but domination of all. It make a character god tier",
                               color=0xe4b91b)
@@ -408,6 +516,10 @@ async def veteran(ctx):
 @bot.command(pass_context=True, aliases=['t', 'trans'])
 async def transcendence(ctx):
     if str(ctx.channel) in ctp:
+        l = scoringSystem(ctx.guild.id,ctx.guild)
+        if l == "no":
+            await ctx.send("**This is one time msg only !!!**\nNew Feature Leaderbord has been added now Servers can compete with others ! \nScores will be based on how many times Bot is used \nTo check the your points use (.points) \nTo check top 5 servers use (.rank)")
+
         embed = discord.Embed(title="CTP of Transcendence",
                               description="With the All Attack stat provided, this CTP is good for character who uses summon/clone as main damage dealer."
                                        " But due to the absence of Immunity to Guard Break, this CTP is not suitable for PvP metas.",
@@ -427,6 +539,10 @@ async def transcendence(ctx):
 @bot.command(pass_context=True, aliases=['p','pai'])
 async def Patience(ctx):
     if str(ctx.channel) in ctp:
+        l = scoringSystem(ctx.guild.id,ctx.guild)
+        if l == "no":
+            await ctx.send("**This is one time msg only !!!**\nNew Feature Leaderbord has been added now Servers can compete with others ! \nScores will be based on how many times Bot is used \nTo check the your points use (.points) \nTo check top 5 servers use (.rank)")
+
         embed = discord.Embed(title="CTP of Patience",
                               description="With the All Attack stat provided, this CTP is good for character who uses summon/clone as main damage dealer."
                                        " But due to the absence of Immunity to Guard Break, this CTP is not suitable for PvP metas.",
@@ -453,6 +569,11 @@ async def location(ctx):
 @bot.command(pass_context=True, aliases=['u', 'ob'])
 async def uru(ctx, * , reason =None):
     if str(ctx.channel) in uru_guide:
+        l = scoringSystem(ctx.guild.id,ctx.guild)
+        if l == "no":
+            await ctx.send("**This is one time msg only !!!**\nNew Feature Leaderbord has been added now Servers can compete with others ! \nScores will be based on how many times Bot is used \nTo check the your points use (.points) \nTo check top 5 servers use (.rank)")
+
+
         if reason == 'heal':
             embed = discord.Embed(title="Odin's Blessing: Heal",
                                 description="• HP - 348/+464\n• HP - 348/+464",
@@ -547,6 +668,10 @@ async def uru(ctx, * , reason =None):
 @bot.command(pass_context=True,aliases=['names'])
 async def name(ctx):
     if str(ctx.channel) in uru_guide:
+        l = scoringSystem(ctx.guild.id,ctx.guild)
+        if l == "no":
+            await ctx.send("**This is one time msg only !!!**\nNew Feature Leaderbord has been added now Servers can compete with others ! \nScores will be based on how many times Bot is used \nTo check the your points use (.points) \nTo check top 5 servers use (.rank)")
+
         embed = discord.Embed(title="Following are the names of available Odin's Blessings",
                               description='• Amplify\n• Heal\n• Magic\n• Resist\n• Balance\n• focus\n• Insight\n• Will\n• Fortitude\n• Steel\n• Strike\n• Toughness',
                               color=0xFF00C5) 
@@ -558,6 +683,12 @@ obls = ("https://images-ext-1.discordapp.net/external/rftLnTiKRQaEv8n7EpjYRiUaaL
 @bot.command(pass_context=True, aliases=['bless','blessing','blessings','odin'])
 async def odinbless(ctx):
     if str(ctx.channel) in uru_guide:
+        l = scoringSystem(ctx.guild.id,ctx.guild)
+        if l == "no":
+            await ctx.send("**This is one time msg only !!!**\nNew Feature Leaderbord has been added now Servers can compete with others ! \nScores will be based on how many times Bot is used \nTo check the your points use (.points) \nTo check top 5 servers use (.rank)")
+
+
+        
         embed = discord.Embed(title="You opened a Odin's Blessing chest wow!",
                               description='Congratulations you got....',
                               color=0x00EAFF)        
