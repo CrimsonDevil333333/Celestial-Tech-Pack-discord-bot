@@ -87,7 +87,7 @@ async def on_ready():
     with open('db.json') as json_file:
         Rank_data = json.load(json_file)
     print("Data loaded sucessfully")
-    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=f'{len(bot.guilds)+79} servers | .help'))
+    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=f'{len(bot.guilds)} servers | .help'))
     
 
 
