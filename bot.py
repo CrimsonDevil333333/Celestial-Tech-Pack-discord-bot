@@ -12,6 +12,8 @@ import pytz
 import threading
 from itertools import cycle
 
+ctp_data = 737898784188530729
+
 ctp = ["ctp-guide"]
 uru_guide = ["uru-guide"]
 memes_ctrl = ["memes"]
@@ -99,6 +101,20 @@ async def Auto_data_upload():
             with open('db.json', 'w') as outfile:
                 json.dump(Rank_data, outfile,indent=4)          
             print("saved")
+            
+            file = discord.File("db.json", filename="db.json")
+            channel = bot.get_channel(id=ctp_data)
+            new_rank = sorted(Rank_data, key = lambda i: i['point'])
+            clr=(0x00b3ff,0xff1f1f,0xff1ff8,0x141cff,0x14ffb1,0x67ff14,0xffe014,0xff1814)
+            clrs=random.choice(clr)
+            embed = discord.Embed(title="Server Ranking",
+                                description=f'This ranking is based on no of times bot is used!\n\n1️⃣ {new_rank[-1]["guild_name"]} :- ({new_rank[-1]["point"]})\n\n2️⃣ {new_rank[-2]["guild_name"]} :- ({new_rank[-2]["point"]})\n\n3️⃣ {new_rank[-3]["guild_name"]} :- ({new_rank[-3]["point"]})\n\n4️⃣ {new_rank[-4]["guild_name"]} :- ({new_rank[-4]["point"]})\n\n5️⃣ {new_rank[-5]["guild_name"]} :- ({new_rank[-5]["point"]})',
+                                
+                                color=clrs)
+            
+            embed.timestamp = datetime.datetime.utcnow()
+            await channel.send(embed=embed,file=file)
+            await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=f'{len(bot.guilds)} servers | .help'))
             await asyncio.sleep(600)
             
 @bot.command(pass_context=True, aliases=["backup","records"])
@@ -106,17 +122,18 @@ async def record(ctx):
     global Rank_data
     with open('db.json', 'w') as outfile:
         json.dump(Rank_data, outfile,indent=4)
-    if str(ctx.author) in valid_users:
-        file = discord.File("db.json", filename="db.json")
-        await ctx.channel.send("Current database ❤",file=file)
-    else :
-        await ctx.send("This feature is only for Devlopers !")
-
+    file = discord.File("db.json", filename="db.json")
+    
+    
+    channel = bot.get_channel(id=ctp_data)
+    await channel.send(f"By anyone pls check :- {datetime.datetime.utcnow()}",file=file)
+    
 @bot.command(pass_context=True, aliases=["Update"])
 async def up(ctx):
     global Rank_data
     with open('db.json', 'w') as outfile:
         json.dump(Rank_data, outfile,indent=4)
+    await ctx.send("Data updated")
 
 @bot.command(pass_context=True, aliases=["point"])
 async def points(ctx):
