@@ -27,6 +27,36 @@
     {
         "guild_name": "Bot Test",
         "guild_id": 637259249738579998,
-        "point": 9
+        "point": 14
+    },
+    {
+        "guild_name": "Forgonation",
+        "guild_id": 553264231034650633,
+        "point": 14
+    },
+    {
+        "guild_name": "The Rex Hub",
+        "guild_id": 721594364777857076,
+        "point": 100
+    },
+    {
+        "guild_name": "Danger room",
+        "guild_id": 729523023719432283,
+        "point": 1
+    },
+    {
+        "guild_name": "ZEDDER ZONE",
+        "guild_id": 558381415423803422,
+        "point": 13
+    },
+    {
+        "guild_name": "Deadpool's Noodle house",
+        "guild_id": 713393171178192947,
+        "point": 3
+    },
+    {
+        "guild_name": "HOUSE OF \u274c",
+        "guild_id": 720492944292839465,
+        "point": 1
     }
 ]
