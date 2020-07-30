@@ -115,7 +115,7 @@ async def Auto_data_upload():
             embed.timestamp = datetime.datetime.utcnow()
             await channel.send(embed=embed,file=file)
             await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=f'{len(bot.guilds)} servers | .help'))
-            await asyncio.sleep(600)
+            await asyncio.sleep(1200)
             
 @bot.command(pass_context=True, aliases=["backup","records"])
 async def record(ctx):
