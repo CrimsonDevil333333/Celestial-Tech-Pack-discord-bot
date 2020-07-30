@@ -9,8 +9,24 @@ import praw
 import datetime
 import json
 import pytz
+import aiml
+import os
 import threading
 from itertools import cycle
+
+bot_name = ["Crimanu#5184","weeb#5184","smasher#5184","smashers#5184"]
+bot_private = ["bot-spam"]
+bot_logs_aiml = 736331700459536545
+k = aiml.Kernel()
+BRAIN_FILE="dump/brain.dump"
+if os.path.exists(BRAIN_FILE):
+    print("Loading from brain file: " + BRAIN_FILE)
+    k.loadBrain(BRAIN_FILE)
+else:
+    print("Parsing aiml files")
+    k.bootstrap(learnFiles="std-startup.aiml", commands="load aiml b")
+    print("Saving brain file: " + BRAIN_FILE)
+    k.saveBrain(BRAIN_FILE)
 
 ctp_data = 737898784188530729
 
@@ -116,7 +132,44 @@ async def Auto_data_upload():
             await channel.send(embed=embed,file=file)
             await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=f'{len(bot.guilds)} servers | .help'))
             await asyncio.sleep(1200)
+
+@bot.command(pass_context=True)
+async def invite(ctx):
+    await ctx.send("Bot invite link :- https://top.gg/bot/630636544587464704 \nJoin support server if ya face any problems or contact Crimson Devil#7759")
+
+
+@bot.command(pass_context=True, aliases=['bud','bro','bot'])
+async def brb(ctx, *, reason=None):
+    global Rank_data
+    new_rank = sorted(Rank_data, key = lambda i: i['point'])
+
+    if reason == None:
+        await ctx.send("What ? ask me any Questions don't just brb or bro me !")
+    else:
+        if str(ctx.author) in bot_name:
+            pass
+        else:
+            if ctx.guild.id==new_rank[-1]["guild_id"] or ctx.guild.id==new_rank[-2]["guild_id"] or ctx.guild.id==new_rank[-3]["guild_id"]  :
+                krp = k.respond(reason)
+                channel = bot.get_channel(id=bot_logs_aiml)
+                color_codes = [0x00FFDA,0x0DFF00,0xFFEB00,0x00FFD7,0x004CFF,0xC600FF,0xFF00AA,0xFF0004,0xCF9292]
+                s ="> **" + str(ctx.author) + "**  --> " + reason + "\n" + krp
+
+                embed = discord.Embed(title="Bot logs !",
+                                    description=f'{str(ctx.author.name)} --> {reason}\n{krp}',
+                                    color=random.choice(color_codes)) 
+                embed.set_thumbnail(
+                    url=ctx.author.avatar_url
+                )
             
+    
+                embed.set_footer(text=f"{ctx.guild}", icon_url=f"{ctx.guild.icon_url}")
+                embed.timestamp = datetime.datetime.utcnow()
+                await channel.send(embed=embed)
+                await ctx.channel.send(s)
+            else:
+                await ctx.send("sorry this is only avilable for top 3 servers")
+
 @bot.command(pass_context=True, aliases=["backup","records"])
 async def record(ctx):
     global Rank_data
@@ -156,7 +209,7 @@ async def top(ctx):
     clr=(0x00b3ff,0xff1f1f,0xff1ff8,0x141cff,0x14ffb1,0x67ff14,0xffe014,0xff1814)
     clrs=random.choice(clr)
     embed = discord.Embed(title="Server Ranking",
-                          description=f'This ranking is based on no of times bot is used!\n\n1️⃣ {new_rank[-1]["guild_name"]} :- ({new_rank[-1]["point"]})\n\n2️⃣ {new_rank[-2]["guild_name"]} :- ({new_rank[-2]["point"]})\n\n3️⃣ {new_rank[-3]["guild_name"]} :- ({new_rank[-3]["point"]})\n\n4️⃣ {new_rank[-4]["guild_name"]} :- ({new_rank[-4]["point"]})\n\n5️⃣ {new_rank[-5]["guild_name"]} :- ({new_rank[-5]["point"]})\n\nYour server points :- {particularPoints(ctx.guild.id)}',
+                          description=f'This ranking is based on no of times bot is used!\n\n1️⃣ {new_rank[-1]["guild_name"]} :- ({new_rank[-1]["point"]})\n\n2️⃣ {new_rank[-2]["guild_name"]} :- ({new_rank[-2]["point"]})\n\n3️⃣ {new_rank[-3]["guild_name"]} :- ({new_rank[-3]["point"]})\n\n4️⃣ {new_rank[-4]["guild_name"]} :- ({new_rank[-4]["point"]})\n\n5️⃣ {new_rank[-5]["guild_name"]} :- ({new_rank[-5]["point"]})\n\nYour server points :- {particularPoints(ctx.guild.id)}\nAs said earlier for top 3 servers special commands have been added\nLike .brb how are you\nafter using .brb you can ask any type of question to this bot !\nTo invite this bot in your server use .invite ',
                           color=clrs)
     embed.set_thumbnail(
         url="https://i.ibb.co/4WHBRtm/pngfind-com-anime-png-598288.png"
