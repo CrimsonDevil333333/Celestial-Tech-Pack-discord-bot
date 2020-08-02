@@ -193,7 +193,7 @@ async def points(ctx):
     global Rank_data   
     await ctx.send(f"Your server points are {particularPoints(ctx.guild.id)}")
 
-@bot.command(pass_context=True, aliases=["ppp","p"])
+@bot.command(pass_context=True, aliases=["ppp","pop"])
 async def top(ctx):
     
     
