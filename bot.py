@@ -149,7 +149,7 @@ async def brb(ctx, *, reason=None):
         if str(ctx.author) in bot_name:
             pass
         else:
-            if ctx.guild.id==new_rank[-1]["guild_id"] or ctx.guild.id==new_rank[-2]["guild_id"] or ctx.guild.id==new_rank[-3]["guild_id"]  :
+            if 1==1  :
                 krp = k.respond(reason)
                 channel = bot.get_channel(id=bot_logs_aiml)
                 color_codes = [0x00FFDA,0x0DFF00,0xFFEB00,0x00FFD7,0x004CFF,0xC600FF,0xFF00AA,0xFF0004,0xCF9292]
@@ -193,7 +193,7 @@ async def points(ctx):
     global Rank_data   
     await ctx.send(f"Your server points are {particularPoints(ctx.guild.id)}")
 
-@bot.command(pass_context=True, aliases=["rank","ranks"])
+@bot.command(pass_context=True, aliases=["ppp","p"])
 async def top(ctx):
     
     
