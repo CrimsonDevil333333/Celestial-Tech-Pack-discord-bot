@@ -33,10 +33,10 @@ ctp_data = 737898784188530729
 ctp = ["ctp-guide"]
 uru_guide = ["uru-guide"]
 memes_ctrl = ["memes"]
-reddit = praw.Reddit(client_id='FNpct8XLVG2LTg',
-                     client_secret='UeA14hUpw7LoKlkqFU2QDLoWu8M',
-                     username='CrimsonDevil333',
-                     password='shashikant@1',
+reddit = praw.Reddit(client_id='Client-id',
+                     client_secret='client-secret',
+                     username='username',
+                     password='testassword@1',
                      user_agent='my user agent')
 valid_users = ["Crimson Devil#7759"]
 global Rank_data
